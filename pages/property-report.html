@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: blob: data:; font-src 'self' file: blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: blob: data:; font-src 'self' file: blob: data:"
+    />
+    <title>Property Report — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/property-report.css" />
+  </head>
+  <body>
+    <div class="report-toolbar">
+      <button type="button" id="back-home">Back</button>
+      <button type="button" id="export-word" disabled>Save Word Report…</button>
+      <span id="preview-source" class="report-preview-badge" hidden>Word-derived preview</span>
+      <span id="export-status" aria-live="polite"></span>
+    </div>
+
+    <section id="report-review" class="report-review" hidden aria-live="polite"></section>
+
+    <aside id="preview-note" class="report-preview-note" hidden>
+      <strong>Word-derived preview.</strong>
+      The saved file uses the exact DOCX bytes rendered below. Microsoft Word remains
+      authoritative for final pagination and live fields such as the table of contents.
+    </aside>
+
+    <!--
+      Save confirmation. The expensive Word build happens before preview; this
+      modal owns the page only while the already-reviewed artifact is written.
+    -->
+    <div id="export-modal" class="report-export-modal" hidden role="presentation">
+      <div
+        class="report-export-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="export-modal-title"
+      >
+        <div id="export-modal-working">
+          <h2 class="report-export-title" id="export-modal-title">Saving the Word report…</h2>
+          <p class="report-export-copy" id="export-modal-label">Writing the reviewed document…</p>
+          <div
+            class="report-export-track"
+            role="progressbar"
+            aria-labelledby="export-modal-title"
+          >
+            <div class="report-export-fill"></div>
+          </div>
+          <p class="report-export-hint">
+            You cannot leave or quit until the file is safely written.
+          </p>
+        </div>
+
+        <div id="export-modal-done" hidden>
+          <h2 class="report-export-title" id="export-modal-done-title">Export finished</h2>
+          <p class="report-export-copy" id="export-modal-done-summary"></p>
+          <ul class="report-export-files" id="export-modal-files"></ul>
+          <div class="report-export-actions">
+            <button type="button" class="btn-primary" id="export-modal-close">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main id="report-root" class="report-root">
+      <section class="report-preview-state" role="status">
+        <div class="report-preview-spinner" aria-hidden="true"></div>
+        <h1>Preparing Word preview…</h1>
+        <p data-preview-phase>Collecting report data…</p>
+      </section>
+    </main>
+    <div id="docx-preview-styles" aria-hidden="true"></div>
+
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../node_modules/jszip/dist/jszip.min.js" defer></script>
+    <script src="../node_modules/docx-preview/dist/docx-preview.min.js" defer></script>
+    <script src="../src/lib/preview-pagination.js" defer></script>
+    <script src="../src/property-report.js" defer></script>
+  </body>
+</html>

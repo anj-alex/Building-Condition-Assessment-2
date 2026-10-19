@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file:"
+    />
+    <title>Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+  </head>
+  <body class="page-home">
+    <nav class="home-top-actions" aria-label="App actions">
+      <button type="button" class="home-top-btn" id="firm-details">
+        Firm details
+      </button>
+      <button
+        type="button"
+        class="home-top-btn home-top-btn--icon"
+        id="open-settings"
+        aria-label="Settings"
+        title="Settings"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path
+            d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 14.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L3.71 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.43.34.68.22l2.39-.96c.5.4 1.05.72 1.63.94l.36 2.54c.05.24.25.42.49.42h3.8c.24 0 .44-.18.49-.42l.36-2.54c.58-.22 1.13-.54 1.63-.94l2.39.96c.25.12.54.02.68-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM13.5 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z"
+          />
+        </svg>
+      </button>
+    </nav>
+    <main class="home-main" id="home-main">
+      <div class="home-sidebar">
+        <header class="home-brand">
+          <p class="home-brand-eyebrow">Building Condition Assessment</p>
+          <h1 class="home-brand-title">Report Workspace</h1>
+        </header>
+        <section class="home-panel" id="projects-section" aria-labelledby="projects-heading">
+          <div class="home-panel-header">
+            <h2 class="home-heading" id="projects-heading">Projects</h2>
+            <button
+              type="button"
+              class="home-action-btn home-action-btn--inline home-action-btn--primary"
+              id="start-new-project"
+            >
+              Start new project
+            </button>
+          </div>
+          <div id="project-list-wrap" class="home-list-wrap"></div>
+        </section>
+
+        <div id="selected-project-title" class="home-selected-project-title" hidden></div>
+
+        <section
+          id="properties-section"
+          class="home-panel home-panel--secondary"
+          aria-labelledby="properties-heading"
+          hidden
+        >
+          <div class="home-panel-header">
+            <h2 class="home-subheading" id="properties-heading">Properties</h2>
+            <div class="home-panel-header-actions">
+              <button
+                type="button"
+                class="home-action-btn home-action-btn--inline"
+                id="import-excel"
+              >
+                Import from Excel
+              </button>
+              <button
+                type="button"
+                class="home-action-btn home-action-btn--inline"
+                id="generate-project-report"
+              >
+                Generate project report
+              </button>
+              <button
+                type="button"
+                class="home-action-btn home-action-btn--inline home-action-btn--primary"
+                id="add-property"
+              >
+                Add new property
+              </button>
+            </div>
+          </div>
+          <div id="property-list-wrap" class="home-list-wrap"></div>
+        </section>
+      </div>
+
+      <section
+        id="building-detail-section"
+        class="home-detail"
+        aria-label="Building sections"
+        hidden
+      >
+        <header id="building-detail-header" class="home-detail-header"></header>
+        <div id="building-detail-tabs" class="home-detail-tabs" role="tablist" aria-label="Building sections"></div>
+        <section
+          id="building-detail-panel"
+          class="home-detail-panel"
+          role="tabpanel"
+          aria-labelledby="building-detail-active-tab"
+          tabindex="0"
+        ></section>
+      </section>
+    </main>
+
+    <!--
+      Import freeze overlay. Reading a ~4 MB workbook and committing thousands of
+      rows both block the main process, so the window stops repainting and the app
+      looks hung. The main process announces each phase (bca:import-phase) and this
+      owns the screen for the duration, the way the report export does.
+    -->
+    <div id="import-modal" class="app-busy-modal" hidden role="presentation">
+      <div
+        class="app-busy-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="import-modal-title"
+      >
+        <h2 class="app-busy-title" id="import-modal-title">Importing from Excel…</h2>
+        <p class="app-busy-copy" id="import-modal-label">Starting…</p>
+        <div class="app-busy-track" role="progressbar" aria-labelledby="import-modal-title">
+          <div class="app-busy-fill"></div>
+        </div>
+        <p class="app-busy-hint">
+          A large workbook can take a minute. You cannot leave or quit until this
+          finishes.
+        </p>
+      </div>
+    </div>
+
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/lib/annotations.js" defer></script>
+    <script src="../src/renderer-asset-form.js" defer></script>
+    <script src="../src/renderer-photos.js" defer></script>
+    <script src="../src/renderer.js" defer></script>
+  </body>
+</html>

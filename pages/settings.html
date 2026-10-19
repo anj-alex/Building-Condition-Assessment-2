@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <title>Settings — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <link rel="stylesheet" href="../styles/project-setup.css" />
+    <link rel="stylesheet" href="../styles/settings.css" />
+  </head>
+  <body class="page-scrollable-form page-settings">
+    <button type="button" class="btn-secondary btn-back-fixed" id="back-home">
+      Back
+    </button>
+    <div class="setup-shell settings-shell">
+      <header class="setup-header">
+        <h1 class="setup-title">Settings</h1>
+      </header>
+
+      <div class="setup-form">
+        <section class="setup-section" aria-labelledby="appearance-heading">
+          <h2 class="setup-section-title" id="appearance-heading">Appearance</h2>
+          <div class="field">
+            <span class="settings-field-label" id="theme-label">Color theme</span>
+            <div
+              class="theme-segmented"
+              role="radiogroup"
+              aria-labelledby="theme-label"
+            >
+              <button
+                type="button"
+                class="theme-segment"
+                role="radio"
+                data-theme-value="light"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                <span class="theme-segment-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <circle cx="12" cy="12" r="4" fill="currentColor" />
+                    <path
+                      d="M12 2v2.2M12 19.8V22M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2 12h2.2M19.8 12H22M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                Light
+              </button>
+              <button
+                type="button"
+                class="theme-segment"
+                role="radio"
+                data-theme-value="dark"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                <span class="theme-segment-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path
+                      d="M15.2 3.1a8.4 8.4 0 1 0 5.7 14.7A8.5 8.5 0 0 1 15.2 3.1Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
+                Dark
+              </button>
+              <button
+                type="button"
+                class="theme-segment"
+                role="radio"
+                data-theme-value="system"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                <span class="theme-segment-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <rect
+                      x="3.5"
+                      y="4.5"
+                      width="17"
+                      height="12"
+                      rx="1.75"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                    />
+                    <path
+                      d="M8 20.5h8M12 16.5v4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+                Match computer
+              </button>
+            </div>
+            <p class="settings-field-hint">
+              “Match computer” uses your device’s light or dark mode setting.
+            </p>
+          </div>
+        </section>
+
+        <section
+          class="setup-section"
+          aria-labelledby="uniformat-heading"
+        >
+          <h2 class="setup-section-title" id="uniformat-heading">Cost data</h2>
+          <div class="settings-resource">
+            <div class="settings-resource-header">
+              <div class="settings-resource-copy">
+                <p class="settings-resource-title">Unit pricing file</p>
+                <p class="settings-field-hint">
+                  This CSV powers asset classification and default unit costs (Uniformat).
+                  A working copy lives in your app data folder so you can edit it. Choose a
+                  different CSV to replace it, or open the current file in your file manager.
+                </p>
+              </div>
+            </div>
+            <div
+              class="settings-resource-preview"
+              id="uniformat-status"
+              aria-live="polite"
+            >
+              <p class="settings-file-name" id="uniformat-status-label">Default pricing list</p>
+              <p class="settings-file-path" id="uniformat-status-path"></p>
+            </div>
+            <div class="settings-actions">
+              <button type="button" class="btn-secondary" id="uniformat-pricing-csv">
+                Choose file…
+              </button>
+              <button
+                type="button"
+                class="btn-secondary"
+                id="uniformat-show-in-folder"
+                disabled
+                aria-label="Show unit pricing file in folder"
+              >
+                Show in folder
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="setup-section"
+          aria-labelledby="app-data-heading"
+        >
+          <h2 class="setup-section-title" id="app-data-heading">Backup &amp; restore</h2>
+          <div class="settings-resource">
+            <div class="settings-resource-header">
+              <div class="settings-resource-copy">
+                <p class="settings-resource-title">Save a copy of your work</p>
+                <p class="settings-field-hint">
+                  Download everything in one file—projects, buildings, photos, firm logo,
+                  and cost data settings. Restoring from a backup replaces the data currently
+                  on this computer.
+                </p>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button type="button" class="btn-secondary" id="export-app-data">
+                Save backup…
+              </button>
+              <button type="button" class="btn-secondary" id="import-app-data">
+                Restore from backup…
+              </button>
+            </div>
+            <p class="settings-field-hint" id="app-data-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section
+          class="setup-section"
+          aria-labelledby="deleted-projects-heading"
+        >
+          <h2 class="setup-section-title" id="deleted-projects-heading">
+            Recover deleted projects
+          </h2>
+          <div class="settings-resource">
+            <div class="settings-resource-header">
+              <div class="settings-resource-copy">
+                <p class="settings-resource-title">Deleted project profiles</p>
+                <p class="settings-field-hint">
+                  Deleted projects stay here until you recover them. Recovery returns the
+                  project and the properties, assets, and photos that were visible when it
+                  was deleted.
+                </p>
+              </div>
+            </div>
+            <div id="deleted-projects-list" class="settings-deleted-projects" aria-live="polite">
+              <p class="settings-field-hint">Checking for deleted projects…</p>
+            </div>
+            <p
+              class="settings-field-hint"
+              id="deleted-projects-status"
+              aria-live="polite"
+            ></p>
+          </div>
+        </section>
+
+        <section
+          class="setup-section"
+          aria-labelledby="ai-heading"
+        >
+          <h2 class="setup-section-title" id="ai-heading">AI photo labels</h2>
+          <div class="settings-resource">
+            <p class="settings-field-hint" id="ai-status-detail"></p>
+            <div class="settings-ai-usage" id="ai-usage-panel" hidden>
+              <p class="settings-resource-title">OpenRouter credits</p>
+              <p class="settings-field-hint">
+                Spend totals for the session API key. “Generate AI for all blank
+                fields” fills empty photo captions and empty executive-summary sections.
+              </p>
+              <dl class="settings-ai-usage-grid" aria-live="polite">
+                <div class="settings-ai-usage-item">
+                  <dt>Used (all time)</dt>
+                  <dd id="ai-usage-total">—</dd>
+                </div>
+                <div class="settings-ai-usage-item">
+                  <dt>Monthly limit left</dt>
+                  <dd id="ai-usage-remaining">—</dd>
+                </div>
+                <div class="settings-ai-usage-item">
+                  <dt>Used this month</dt>
+                  <dd id="ai-usage-monthly">—</dd>
+                </div>
+              </dl>
+              <p class="settings-field-hint" id="ai-usage-meta"></p>
+              <p class="settings-field-hint" id="ai-usage-status" aria-live="polite"></p>
+              <div class="settings-actions">
+                <button type="button" class="btn-secondary" id="ai-usage-refresh">
+                  Refresh usage
+                </button>
+                <button type="button" class="btn-secondary" id="ai-generate-blank-captions">
+                  Generate AI for all blank fields
+                </button>
+              </div>
+            </div>
+            <p class="settings-field-hint" id="ai-action-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="setup-section" aria-labelledby="about-heading">
+          <h2 class="setup-section-title" id="about-heading">About</h2>
+          <div class="settings-resource">
+            <div class="settings-resource-header">
+              <div class="settings-resource-copy">
+                <p class="settings-resource-title" id="app-about-version">Version</p>
+              </div>
+            </div>
+            <dl
+              class="settings-debug"
+              id="app-debug-info"
+            ></dl>
+            <div class="settings-actions">
+              <button type="button" class="btn-secondary" id="copy-app-debug">
+                Copy debug info
+              </button>
+            </div>
+            <p
+              class="settings-field-hint"
+              id="app-debug-status"
+              aria-live="polite"
+            ></p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div
+      id="ai-bulk-modal"
+      class="settings-ai-bulk-modal"
+      hidden
+      role="presentation"
+    >
+      <div
+        class="settings-ai-bulk-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-bulk-title"
+      >
+        <div id="ai-bulk-confirm">
+          <h2 class="settings-ai-bulk-title" id="ai-bulk-title">
+            Generate AI for all blank fields?
+          </h2>
+          <p class="settings-ai-bulk-copy" id="ai-bulk-explain">
+            This will fill empty photo captions and empty executive-summary sections
+            using AI. You will not be able to leave or quit until this finishes.
+          </p>
+          <p class="settings-field-hint" id="ai-bulk-counts" aria-live="polite"></p>
+          <div class="settings-actions settings-ai-bulk-actions">
+            <button type="button" class="btn-secondary" id="ai-bulk-cancel">
+              Cancel
+            </button>
+            <button type="button" class="btn-primary" id="ai-bulk-continue">
+              Continue
+            </button>
+          </div>
+        </div>
+
+        <div id="ai-bulk-progress" hidden>
+          <h2 class="settings-ai-bulk-title" id="ai-bulk-progress-title">
+            Generating…
+          </h2>
+          <p class="settings-ai-bulk-copy" id="ai-bulk-progress-label">
+            Starting…
+          </p>
+          <div
+            class="settings-ai-bulk-progress-track"
+            id="ai-bulk-progress-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            aria-labelledby="ai-bulk-progress-title"
+          >
+            <div class="settings-ai-bulk-progress-fill" id="ai-bulk-progress-fill"></div>
+          </div>
+          <p class="settings-field-hint" id="ai-bulk-progress-count">0 / 0</p>
+        </div>
+
+        <div id="ai-bulk-done" hidden>
+          <h2 class="settings-ai-bulk-title" id="ai-bulk-done-title">Finished</h2>
+          <p class="settings-ai-bulk-copy" id="ai-bulk-done-summary"></p>
+          <div class="settings-actions settings-ai-bulk-actions">
+            <button type="button" class="btn-primary" id="ai-bulk-close">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/settings.js" defer></script>
+  </body>
+</html>

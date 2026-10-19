@@ -1,0 +1,267 @@
+{
+  "source": {
+    "workbook": "samples/Asset-List_ASHC-Lodge-South-BCA_Worksheet_draft_v1.xlsx",
+    "notes": [
+      "Costs are constant assessment-year dollars; workbook inflation cell is unused.",
+      "CRV uses the seven workbook soft-cost factors (86% uplift), not the PDF's extra 14%.",
+      "Default building location factor in the app is 1.0 (neutral), not a sample site factor."
+    ]
+  },
+  "horizon": {
+    "offsets": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25
+    ],
+    "label": "assessment year through +25 years (26 year columns)"
+  },
+  "terms": [
+    {
+      "id": "immediate",
+      "label": "Immediate Term",
+      "offset_from": 0,
+      "offset_to": 0
+    },
+    {
+      "id": "short",
+      "label": "Short Term",
+      "offset_from": 1,
+      "offset_to": 2
+    },
+    {
+      "id": "medium",
+      "label": "Medium Term",
+      "offset_from": 3,
+      "offset_to": 5
+    },
+    {
+      "id": "long",
+      "label": "Long Term",
+      "offset_from": 6,
+      "offset_to": 10
+    },
+    {
+      "id": "end_of_life",
+      "label": "End of Life",
+      "offset_from": 11,
+      "offset_to": 25
+    }
+  ],
+  "unit_cost_rounding": [
+    {
+      "max_exclusive": 100,
+      "places": 0
+    },
+    {
+      "max_exclusive": 1000,
+      "places": -1
+    },
+    {
+      "max_exclusive": null,
+      "places": -2
+    }
+  ],
+  "opc_rounding": {
+    "threshold_exclusive": 1000000,
+    "above_or_equal_places": -2,
+    "above_threshold_places": -3,
+    "note": "Workbook uses > 1000000 for thousands rounding; exactly 1000000 rounds to hundreds."
+  },
+  "crv_uplift": {
+    "profile": "workbook_86",
+    "factors": [
+      {
+        "name": "Installation",
+        "percent": 35
+      },
+      {
+        "name": "Commissioning",
+        "percent": 5
+      },
+      {
+        "name": "Training",
+        "percent": 1
+      },
+      {
+        "name": "Engineering",
+        "percent": 12
+      },
+      {
+        "name": "Design Review",
+        "percent": 3
+      },
+      {
+        "name": "Contingency",
+        "percent": 15
+      },
+      {
+        "name": "Project Management",
+        "percent": 15
+      }
+    ],
+    "uplift_percent": 86,
+    "multiplier": 1.86
+  },
+  "fci": {
+    "windows": [
+      {
+        "id": "years_0_2",
+        "label": "Immediate + Short Term (0\u20132 years)",
+        "offset_from": 0,
+        "offset_to": 2,
+        "grade_scale": "ifma"
+      },
+      {
+        "id": "years_0_5",
+        "label": "0\u20135 years",
+        "offset_from": 0,
+        "offset_to": 5,
+        "grade_scale": "revised_0_5"
+      },
+      {
+        "id": "years_0_10",
+        "label": "0\u201310 years",
+        "offset_from": 0,
+        "offset_to": 10,
+        "grade_scale": "ifma"
+      },
+      {
+        "id": "years_0_25",
+        "label": "End of Life (0\u201325 years)",
+        "offset_from": 0,
+        "offset_to": 25,
+        "grade_scale": "ifma"
+      }
+    ],
+    "grade_scales": {
+      "ifma": [
+        {
+          "max_inclusive": 0.025,
+          "label": "Very Good"
+        },
+        {
+          "max_inclusive": 0.05,
+          "label": "Good"
+        },
+        {
+          "max_inclusive": 0.1,
+          "label": "Fair"
+        },
+        {
+          "max_inclusive": 0.3,
+          "label": "Poor"
+        },
+        {
+          "max_inclusive": null,
+          "label": "Critical"
+        }
+      ],
+      "revised_0_5": [
+        {
+          "max_exclusive": 0.15,
+          "label": "Good"
+        },
+        {
+          "max_inclusive": 0.4,
+          "label": "Fair"
+        },
+        {
+          "max_inclusive": null,
+          "label": "Poor"
+        }
+      ]
+    }
+  },
+  "condition_ratings": [
+    {
+      "score": 1,
+      "stored_value": "Very good",
+      "legacy_label": "Very Good",
+      "letter": "A",
+      "revised_label": "Excellent",
+      "display": "A - Excellent"
+    },
+    {
+      "score": 2,
+      "stored_value": "Good",
+      "legacy_label": "Good",
+      "letter": "B",
+      "revised_label": "Good",
+      "display": "B - Good"
+    },
+    {
+      "score": 3,
+      "stored_value": "Fair",
+      "legacy_label": "Fair",
+      "letter": "C",
+      "revised_label": "Acceptable",
+      "display": "C - Acceptable"
+    },
+    {
+      "score": 4,
+      "stored_value": "Poor",
+      "legacy_label": "Poor",
+      "letter": "D",
+      "revised_label": "Marginal",
+      "display": "D - Marginal"
+    },
+    {
+      "score": 5,
+      "stored_value": "Very poor",
+      "legacy_label": "Very Poor",
+      "letter": "E",
+      "revised_label": "Poor",
+      "display": "E - Poor"
+    },
+    {
+      "score": 6,
+      "stored_value": "Critical",
+      "legacy_label": "Critical",
+      "letter": "F",
+      "revised_label": "Critical",
+      "display": "F - Critical"
+    }
+  ],
+  "suppressed_actions": [
+    "No Action"
+  ],
+  "suppressed_terms": [
+    "N/A"
+  ],
+  "expected_counts": {
+    "workbook_uniformat_pricing_rows": 1773,
+    "supplement_uniformat_pricing_rows": 1,
+    "location_factor_rows": 74
+  },
+  "formula_templates": {
+    "remaining_life": "IF(W4=\"\",0,Y4-X4+AA4)",
+    "replacement_year": "IF(Z4=\"\",\"\",Legend!$B$2+Worksheet!Z4)",
+    "action_year": "IF(AC4=\"\",AB4,AC4)",
+    "absolute_life": "IF(AD4=\"\",Y4,AD4)",
+    "unit_cost": "IF(AI4<100,ROUND(AI4*VLOOKUP(C4,Legend!$A$4:$F$50,6,FALSE),0),IF(AI4<1000,ROUND(AI4*VLOOKUP(C4,Legend!$A$4:$F$50,6,FALSE),-1),ROUND(AI4*VLOOKUP(C4,Legend!$A$4:$F$50,6,FALSE),-2)))",
+    "opc": "IF(AJ4*AH4>1000000,ROUND(AJ4*AH4,-3),ROUND(AJ4*AH4,-2))"
+  }
+}

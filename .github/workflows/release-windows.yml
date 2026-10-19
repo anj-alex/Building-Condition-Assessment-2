@@ -1,0 +1,289 @@
+# Test and build Windows and Linux distributions, then:
+#   - publish a GitHub Release, and
+#   - upload the same artifacts to a private Azure Blob Storage container so
+#     you can hand out expiring SAS download links (see scripts/azure-release-links.sh).
+#
+# Azure infra + GitHub Actions secrets (AZURE_STORAGE_ACCOUNT,
+# AZURE_STORAGE_CONTAINER, AZURE_STORAGE_KEY) are provisioned via Terraform in
+# terraform/. Authenticates to Azure Storage with the account key — no Entra ID
+# app registration (school-account tenant blocks member app registrations).
+#
+# Manual kickoff only, like every workflow in this repo — nothing here starts
+# itself. Run from: Actions → Release Desktop → Run workflow.
+# `test/workflows-manual-only.test.js` fails if an automatic trigger is added.
+name: Release Desktop
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0). Leave blank to use v{package.json version}.'
+        required: false
+        type: string
+      draft:
+        description: 'Create the release as a draft'
+        required: false
+        type: boolean
+        default: false
+      prerelease:
+        description: 'Mark the release as a pre-release'
+        required: false
+        type: boolean
+        default: false
+
+# This block is necessary but NOT sufficient: the repository setting
+# Settings → Actions → General → Workflow permissions is a hard ceiling on
+# GITHUB_TOKEN, and must be "Read and write". With it set to read-only the
+# release job fails with a 403 "Resource not accessible by integration" while
+# the runner log still prints "Contents: write" — that group reports what the
+# workflow asked for, not what was granted, so the log looks correct. Note also
+# that re-running a failed job reuses the token issued when the run was first
+# created, so fixing the setting requires a brand-new run, not a re-run.
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  verify-gate:
+    name: Require Verify Desktop on this commit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Find a successful Verify Desktop run for this SHA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          runs=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/verify-desktop.yml/runs?event=workflow_dispatch&status=success&per_page=100" \
+            --paginate --slurp)
+          if ! jq -e --arg sha "$GITHUB_SHA" \
+            'map(.workflow_runs) | flatten | any(.head_sha == $sha and .conclusion == "success")' \
+            <<<"$runs" >/dev/null; then
+            echo "::error::Verify Desktop has not succeeded for commit $GITHUB_SHA. Dispatch verify-desktop.yml on this exact commit and wait for both legs before releasing."
+            exit 1
+          fi
+
+  test:
+    name: Database regression tests
+    needs: verify-gate
+    runs-on: ubuntu-24.04
+    # Every job here needs an explicit cap. Without one GitHub applies its
+    # 360-minute default, and this is the workflow that runs Windows — billed at
+    # 2x — so one wedged job could quietly spend 720 minutes of a 2,000-minute
+    # month. Caps are ~3x the real runtimes measured on Verify Desktop, which
+    # runs a superset of these same steps in 7 minutes.
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 6
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    name: Build (${{ matrix.name }})
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-2022
+            platform: win32
+            artifact: windows
+          - name: Linux
+            os: ubuntu-24.04
+            platform: linux
+            artifact: linux
+
+    # Windows is pinned because @electron/node-gyp 10.2 does not support VS 2026.
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 6
+        run: npm ci
+
+      - name: Package application
+        run: npm run package -- --platform=${{ matrix.platform }}
+
+      # Opening a real BrowserWindow needs a display. --ozone-platform=headless
+      # survives a main-process-only launch but segfaults on window creation, so
+      # the Linux smoke run gets a virtual display instead.
+      - name: Smoke test packaged app (Linux)
+        if: matrix.platform == 'linux'
+        run: xvfb-run --auto-servernum npm run test:packaged -- linux
+
+      - name: Smoke test packaged app (Windows)
+        if: matrix.platform == 'win32'
+        run: npm run test:packaged -- win32
+
+      - name: Build distribution
+        timeout-minutes: 8
+        run: npm run make -- --platform=${{ matrix.platform }} --skip-package
+
+      # Users run Setup.exe, not the packaged directory tested above. This
+      # installs it for real, checks Squirrel created shortcuts, and launches
+      # what landed in %LOCALAPPDATA%.
+      - name: Smoke test Windows installer
+        if: matrix.platform == 'win32'
+        run: npm run test:installed
+
+      - name: Upload distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.artifact }}
+          path: out/make/**/*
+          if-no-files-found: error
+          # This artifact only has to survive the hop from this job to the
+          # release job below; once that job runs, the same bytes live on the
+          # GitHub Release and in Azure Blob Storage. At ~460 MB per run the
+          # default 90-day retention filled the account's 2 GB Actions storage
+          # in nine runs. One day is the minimum GitHub allows and is still far
+          # longer than the handoff needs.
+          retention-days: 1
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: artifacts
+
+      - name: Resolve release tag
+        id: meta
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v${VERSION}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Using release tag: ${TAG}"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  azure-upload:
+    # Mirrors the same distribution files into Azure Blob Storage under
+    # `<container>/<tag>/<file>`. The container is private; downloads use the
+    # expiring SAS links printed by scripts/azure-release-links.sh.
+    #
+    # Authenticates with the storage account KEY (no Entra ID / OIDC) because
+    # the deploying user cannot create an Entra ID app registration on this
+    # Azure for Students tenant. az storage commands honor AZURE_STORAGE_KEY.
+    name: Upload to Azure
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      AZURE_STORAGE_KEY: ${{ secrets.AZURE_STORAGE_KEY }}
+    permissions:
+      contents: read     # only needs to read package.json for tag resolution
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: artifacts
+
+      - name: Resolve release tag
+        id: meta
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            TAG="v${VERSION}"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Uploading to Azure under prefix: ${TAG}/"
+
+      - name: Upload release files to Azure Blob Storage
+        env:
+          AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_CONTAINER: ${{ secrets.AZURE_STORAGE_CONTAINER }}
+        run: |
+          set -euo pipefail
+          account="$AZURE_STORAGE_ACCOUNT"
+          container="$AZURE_STORAGE_CONTAINER"
+          prefix="${{ steps.meta.outputs.tag }}"
+          uploaded=0
+          # download-artifact places files under artifacts/release-<windows|linux>/...
+          # Flatten to <prefix>/<basename> in the container. Basenames are unique
+          # across the Squirrel (Windows) and Zip (Linux) makers.
+          while IFS= read -r -d '' f; do
+            name="$(basename "$f")"
+            echo "Uploading ${name} -> ${prefix}/${name}"
+            az storage blob upload \
+              --account-name "$account" \
+              --container-name "$container" \
+              --name "${prefix}/${name}" \
+              --file "$f" \
+              --auth-mode key \
+              --overwrite true
+            uploaded=$((uploaded + 1))
+          done < <(find artifacts -type f -print0)
+          echo "Uploaded ${uploaded} files to ${container}/${prefix}/"
+          if [ "$uploaded" -eq 0 ]; then
+            echo "::error::No release files found under artifacts/"
+            exit 1
+          fi

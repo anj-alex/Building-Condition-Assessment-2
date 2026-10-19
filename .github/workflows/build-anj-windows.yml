@@ -1,0 +1,29 @@
+name: Build ANJ BCA Windows Installer
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Test photo filename matching
+        run: node --test test/photo-filename-matcher.test.js
+      - name: Build Windows installer
+        run: npm run make
+      - name: Upload EXE installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ANJ-BCA-Manager-Windows-build
+          path: |
+            out/make/**/*.exe
+            out/make/**/*.nupkg
+          if-no-files-found: error

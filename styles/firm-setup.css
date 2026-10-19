@@ -1,0 +1,55 @@
+.firm-setup-shell {
+  max-width: 38rem;
+}
+
+.firm-logo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.firm-logo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.firm-logo-header label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.firm-logo-add {
+  min-height: 2.2rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.firm-logo-preview {
+  display: grid;
+  min-height: 5.5rem;
+  place-items: center;
+  padding: 0.9rem;
+  background: var(--bg-elevated-2);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.firm-logo-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 5rem;
+  object-fit: contain;
+}
+
+.firm-logo-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.firm-logo-remove-btn {
+  margin-top: 0.5rem;
+}

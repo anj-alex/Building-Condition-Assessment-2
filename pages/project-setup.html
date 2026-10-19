@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' blob: data:"
+    />
+    <title>Project Setup — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <link rel="stylesheet" href="../styles/project-setup.css" />
+  </head>
+  <body class="page-scrollable-form">
+    <button type="button" class="btn-secondary btn-back-fixed" id="back-home">
+      Back
+    </button>
+    <div class="setup-shell">
+      <header class="setup-header">
+        <h1 class="setup-title">Project setup</h1>
+      </header>
+
+      <form id="project-setup-form" class="setup-form" novalidate>
+        <section class="setup-section" aria-labelledby="project-heading">
+          <h2 class="setup-section-title" id="project-heading">
+            Project
+          </h2>
+          <div class="field" hidden>
+            <label for="project-number">Project number</label>
+            <input
+              id="project-number"
+              name="id"
+              type="text"
+              value="Generated on save"
+              readonly
+            />
+          </div>
+          <div class="field">
+            <label for="client">Client</label>
+            <input
+              id="client"
+              name="client"
+              type="text"
+              autocomplete="organization"
+            />
+          </div>
+        </section>
+
+        <div class="setup-actions setup-actions--split" id="project-setup-actions">
+          <div class="setup-actions-left" id="project-delete-slot"></div>
+          <div class="setup-actions-right">
+            <span
+              class="form-autosave-status"
+              id="project-autosave-status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/project-setup.js" defer></script>
+  </body>
+</html>

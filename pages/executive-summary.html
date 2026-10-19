@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' blob: data:"
+    />
+    <title>Executive Summary — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <link rel="stylesheet" href="../styles/project-setup.css" />
+  </head>
+  <body class="page-scrollable-form page-executive-summary">
+    <button type="button" class="btn-secondary btn-back-fixed" id="back-home">
+      Back
+    </button>
+    <div class="setup-shell executive-summary-shell">
+      <header class="setup-header">
+        <h1 class="setup-title">Executive Summary</h1>
+        <p class="setup-lead" id="executive-summary-context"></p>
+      </header>
+
+      <form id="executive-summary-form" class="setup-form" novalidate>
+        <section class="setup-section" aria-labelledby="executive-summary-heading">
+          <h2 class="setup-section-title" id="executive-summary-heading">
+            Property Overview
+          </h2>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="accessibility">Accessibility Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="accessibility"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="accessibility" name="accessibility" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="accessibility" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="designated-substance-survey">Designated Substance Survey Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="designated_substance_survey"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="designated-substance-survey" name="designated_substance_survey" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="designated_substance_survey" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="architectural-structural">Architectural &amp; Structural Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="architectural_structural"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="architectural-structural" name="architectural_structural" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="architectural_structural" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="plumbing">Plumbing Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="plumbing"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="plumbing" name="plumbing" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="plumbing" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="mechanical">Mechanical Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="mechanical"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="mechanical" name="mechanical" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="mechanical" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="electrical">Electrical Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="electrical"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="electrical" name="electrical" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="electrical" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="fire-life-safety">Fire and Life Safety Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="fire_life_safety"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="fire-life-safety" name="fire_life_safety" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="fire_life_safety" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="site">Site Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="site"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="site" name="site" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="site" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="code-compliance">Code Compliance Executive Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="code_compliance"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="code-compliance" name="code_compliance" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="code_compliance" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="immediate-concerns">Immediate Concerns</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="immediate_concerns"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="immediate-concerns" name="immediate_concerns" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="immediate_concerns" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="facility-overview">Facility Overview</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="facility_overview"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="facility-overview" name="facility_overview" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="facility_overview" hidden></p>
+          </div>
+
+          <div class="field">
+            <div class="field-header">
+              <label for="capital-needs">Capital Needs Summary</label>
+              <button
+                type="button"
+                class="btn-secondary btn-ai-generate"
+                data-summary-field="capital_needs"
+                title="Generate this section with AI from property and asset data"
+              >
+                Generate with AI
+              </button>
+            </div>
+            <textarea id="capital-needs" name="capital_needs" rows="5"></textarea>
+            <p class="field-ai-status" data-summary-status="capital_needs" hidden></p>
+          </div>
+        </section>
+
+        <div class="setup-actions setup-actions--split">
+          <div class="setup-actions-left">
+            <button type="button" class="btn-danger" id="clear-executive-summary">
+              Clear summary
+            </button>
+          </div>
+          <div class="setup-actions-right">
+            <span
+              class="form-autosave-status"
+              id="executive-summary-autosave-status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/executive-summary.js" defer></script>
+  </body>
+</html>

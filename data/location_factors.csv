@@ -1,0 +1,75 @@
+province,city,material_index,installation_index,total_index,factor
+Alberta,Calgary,119.5,98.8,110.4,1.104
+Alberta,Edmonton,120.4,98.8,110.9,1.109
+Alberta,Fort McMurray,123.4,91.9,109.7,1.097
+Alberta,Lethbridge,118.3,91.4,106.5,1.065
+Alberta,Lloydminister,112.7,88.1,101.9,1.019
+Alberta,Medicine Hat,112.9,87.4,101.7,1.017
+Alberta,Red Deer,113.3,87.4,102,1.02
+British Columbia,Kamloops,114.1,87.2,102.3,1.023
+British Columbia,Prince George,115.1,86.6,102.6,1.026
+British Columbia,Vancouver,118,91.2,106.3,1.063
+British Columbia,Victoria,115.3,85.7,102.3,1.023
+Manitoba,Brandon,123.6,73.8,101.8,1.018
+Manitoba,Portage la Prairie,112.7,72.2,94.9,0.949
+Manitoba,Winnipeg,121.3,72,99.7,0.997
+New Brunswick,Bathurst,111.3,65,91,0.91
+New Brunswick,Dalhousie,111.3,65.2,91.1,0.911
+New Brunswick,Fredericton,118.2,72.5,98.2,0.982
+New Brunswick,Moncton,111.5,69.3,93,0.93
+New Brunswick,Newcastle,111.3,65.7,91.3,0.913
+New Brunswick,St. John,113.8,77,97.7,0.977
+Newfoundland,Corner Brook,128,71.5,103.3,1.033
+Newfoundland,St. Johns,120.7,90.3,107.4,1.074
+Northwest Territories,Yellowknife,133.4,86.2,112.7,1.127
+Nova Scotia,Bridgewater,112.3,73.4,95.3,0.953
+Nova Scotia,Dartmouth,124.6,73.5,102.2,1.022
+Nova Scotia,Halifax,117.4,87.2,104.2,1.042
+Nova Scotia,New Glasgow,122.6,73.5,101.1,1.011
+Nova Scotia,Sydney,120.6,73.5,100,1
+Nova Scotia,Truro,111.9,73.4,95.1,0.951
+Nova Scotia,Yarmouth,122.5,73.5,101.1,1.011
+Ontario,Barrie,117,91,105.6,1.056
+Ontario,Brantford,114.3,94.9,105.8,1.058
+Ontario,Cornwall,114.2,91.3,104.2,1.042
+Ontario,Hamilton,116,99.6,108.8,1.088
+Ontario,Kingston,115.3,91.4,104.8,1.048
+Ontario,Kitchener,109.1,95.1,103,1.03
+Ontario,London,115.6,97,107.5,1.075
+Ontario,North Bay,125.6,89.2,109.7,1.097
+Ontario,Oshawa,111.6,94.7,104.2,1.042
+Ontario,Ottawa,117.2,98,108.8,1.088
+Ontario,Owen Sound,117.1,89.2,104.9,1.049
+Ontario,Peterborough,114.3,91.1,104.1,1.041
+Ontario,Sarnia,114.3,95.5,106,1.06
+Ontario,Sault Ste. Marie,109.6,91.7,101.8,1.018
+Ontario,St. Catharines,107.1,96.1,102.3,1.023
+Ontario,Sudbury,106.9,94.9,101.6,1.016
+Ontario,Thunder Bay,108.3,95.4,102.7,1.027
+Ontario,Timmins,114.4,89.2,103.4,1.034
+Ontario,Toronto,115.9,104.2,110.8,1.108
+Ontario,Windsor,107.6,95.2,102.2,1.022
+Prince Edward Island,Charlottetown,120.9,62.8,95.5,0.955
+Prince Edward Island,Summerside,125.1,60.5,96.8,0.968
+Quebec,Cap-de-la-Madeleine,111.7,83.6,99.4,0.994
+Quebec,Charlesbourg,111.7,83.6,99.4,0.994
+Quebec,Chicoutimi,111.1,88.9,101.4,1.014
+Quebec,Gatineau,111.4,83.4,99.1,0.991
+Quebec,Granby,111.6,83.3,99.2,0.992
+Quebec,Hull,111.5,83.4,99.2,0.992
+Quebec,Joliette,111.9,83.6,99.5,0.995
+Quebec,Laval,111.5,83.4,99.2,0.992
+Quebec,Montreal,118,91.7,106.5,1.065
+Quebec,Quebec City,118.5,92.2,107,1.07
+Quebec,Rimouski,111.3,88.9,101.5,1.015
+Quebec,Rouyn-Noranda,111.4,83.4,99.1,0.991
+Quebec,Saint-Hyacinthe,110.8,83.4,98.8,0.988
+Quebec,Sherbrooke,111.7,83.4,99.3,0.993
+Quebec,Sorel,111.9,83.6,99.5,0.995
+Quebec,Saint-Jerome,111.4,83.4,99.1,0.991
+Quebec,Trois-Rivieres,123.3,83.6,105.9,1.059
+Saskatchewan,Moose Jaw,110.1,66.7,91.1,0.911
+Saskatchewan,Prince Albert,109.2,65,89.8,0.898
+Saskatchewan,Regina,122.8,95.4,110.8,1.108
+Saskatchewan,Saskatoon,110.8,92.5,102.7,1.027
+Yukon,Whitehorse,135.9,71.3,107.6,1.076

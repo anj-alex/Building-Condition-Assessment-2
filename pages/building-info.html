@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <title>Building Info — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <link rel="stylesheet" href="../styles/project-setup.css" />
+    <link rel="stylesheet" href="../styles/building-info.css" />
+  </head>
+  <body class="page-scrollable-form page-building-info">
+    <button type="button" class="btn-secondary btn-back-fixed" id="back-home">
+      Back
+    </button>
+    <div class="setup-shell">
+      <header class="setup-header">
+        <h1 class="setup-title">B. Building information</h1>
+      </header>
+
+      <form id="building-info-form" class="setup-form" novalidate>
+        <section class="setup-section" aria-labelledby="building-core-heading">
+          <h2 class="setup-section-title" id="building-core-heading">
+            Building
+          </h2>
+          <div class="field">
+            <span class="field-label">Client</span>
+            <p id="project-client" class="field-display"></p>
+          </div>
+          <div class="field">
+            <label for="property-name">Property name</label>
+            <input
+              id="property-name"
+              name="property_name"
+              type="text"
+              autocomplete="organization"
+            />
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea
+              id="address"
+              name="address"
+              rows="3"
+              autocomplete="street-address"
+            ></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="city">City</label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                autocomplete="address-level2"
+              />
+            </div>
+            <div class="field">
+              <label for="province">Province</label>
+              <input
+                id="province"
+                name="province"
+                type="text"
+                autocomplete="address-level1"
+              />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="province-short">Province short</label>
+              <input
+                id="province-short"
+                name="province_short"
+                type="text"
+                autocomplete="address-level1"
+              />
+            </div>
+            <div class="field">
+              <label for="postal-code">Postal code</label>
+              <input
+                id="postal-code"
+                name="postal_code"
+                type="text"
+                autocomplete="postal-code"
+              />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="gross-floor-area-m2">Gross floor area (m2)</label>
+              <input
+                id="gross-floor-area-m2"
+                name="gross_floor_area_m2"
+                type="number"
+                min="0.01"
+                step="0.01"
+                inputmode="decimal"
+              />
+            </div>
+            <div class="field">
+              <label for="property-vintage">Property vintage</label>
+              <input
+                id="property-vintage"
+                name="property_vintage"
+                type="number"
+                min="1800"
+                step="1"
+                inputmode="numeric"
+              />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="date-of-assessment">Date of assessment</label>
+              <input
+                id="date-of-assessment"
+                name="date_of_assessment"
+                type="date"
+              />
+            </div>
+            <div class="field">
+              <label for="num-floors">Number of floors</label>
+              <input
+                id="num-floors"
+                name="num_floors"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="location-factor-key">Cost location factor</label>
+              <select id="location-factor-key" name="location_factor_key">
+                <option value="">Custom / neutral (1.0)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="location-factor">Location factor value</label>
+              <input
+                id="location-factor"
+                name="location_factor"
+                type="number"
+                min="0.001"
+                step="0.001"
+                value="1"
+                inputmode="decimal"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label for="current-replacement-value">Current replacement value override (CAD)</label>
+            <input
+              id="current-replacement-value"
+              name="current_replacement_value"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="decimal"
+            />
+            <p class="field-hint">
+              Leave blank to derive CRV from asset replacement values × 1.86 soft-cost uplift.
+            </p>
+          </div>
+          <div class="building-photo-field">
+            <div class="building-photo-header">
+              <label>Property photos</label>
+              <button
+                type="button"
+                class="btn-secondary building-photo-add"
+                id="add-building-photos"
+              >
+                Add photos
+              </button>
+            </div>
+            <div
+              id="building-photo-preview"
+              class="building-photo-preview"
+              aria-live="polite"
+            ></div>
+          </div>
+        </section>
+
+        <div class="setup-actions setup-actions--split">
+          <div class="setup-actions-left" id="building-delete-slot"></div>
+          <div class="setup-actions-right">
+            <span
+              class="form-autosave-status"
+              id="building-autosave-status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/building-info.js" defer></script>
+  </body>
+</html>

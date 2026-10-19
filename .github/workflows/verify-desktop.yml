@@ -1,0 +1,217 @@
+# Non-publishing desktop verification gate for Windows and Linux.
+#
+# This is the pre-release proof that the actual product builds, packages,
+# installs and drives a real window on both platforms. It creates NO release,
+# uploads NO installer, and touches NO external storage — the only artifact it
+# leaves is a small bundle of logs and screenshots under out/verify-desktop/.
+#
+# It exists because Release Desktop is the only other workflow that runs real
+# Windows checks, and that workflow publishes a GitHub Release and uploads to
+# Azure in the same run. Before this file, the only way to learn whether Windows
+# worked was to ship. Dispatch this first; ship second.
+#
+# Manual kickoff only, like every workflow in this repo — nothing here starts
+# itself. Run from: Actions → Verify Desktop → Run workflow, or
+# `gh workflow run verify-desktop.yml --ref main`.
+# `test/workflows-manual-only.test.js` fails if any automatic trigger is added
+# back, and also asserts this file exists with both matrix legs — so deleting
+# the Windows gate again becomes a failing unit test.
+#
+# The pre-release contract (docs/releasing.md): Verify Desktop must be
+# dispatched on the release commit and come back green before Release Desktop is
+# run. Neither workflow starts the other.
+name: Verify Desktop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-2022
+            platform: win32
+          - name: Linux
+            os: ubuntu-24.04
+            platform: linux
+
+    # Pin windows-2022 rather than windows-latest: @electron/node-gyp 10.2 does
+    # not support the VS 2026 image. release-windows.yml pins it for the same
+    # reason.
+    runs-on: ${{ matrix.os }}
+    # Real runtime on this workflow is 7 minutes (Windows) and 5 (Linux); the
+    # whole CDP suite is 99 seconds of that. This is the outermost backstop
+    # only — every step below carries its own cap, and scenarios carry a budget
+    # inside the driver, so a hang is named and killed long before this fires.
+    # It bills at 2x on Windows, which is why it is not left at a round 40.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Everything the upload collects lands here. No installers, no packaged
+      # output — logs and screenshots only.
+      - name: Prepare evidence directory (Windows)
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force out/verify-desktop/logs, out/verify-desktop/screenshots | Out-Null
+
+      - name: Prepare evidence directory (Linux)
+        if: matrix.platform == 'linux'
+        run: mkdir -p out/verify-desktop/logs out/verify-desktop/screenshots
+
+      # --- Install --------------------------------------------------------
+      - name: Install dependencies (Windows)
+        timeout-minutes: 6
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm ci 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/npm-ci.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Install dependencies (Linux)
+        timeout-minutes: 6
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          npm ci 2>&1 | tee out/verify-desktop/logs/npm-ci.log
+
+      # --- Unit tests (new Windows coverage) ------------------------------
+      - name: Run unit tests (Windows)
+        timeout-minutes: 6
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm test 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/npm-test.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run unit tests with coverage (Linux)
+        timeout-minutes: 6
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          npm run test:coverage 2>&1 | tee out/verify-desktop/logs/npm-test.log
+
+      # --- Package --------------------------------------------------------
+      - name: Package application (Windows)
+        timeout-minutes: 6
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm run package -- --platform=win32 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/package.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Package application (Linux)
+        timeout-minutes: 6
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          npm run package -- --platform=linux 2>&1 | tee out/verify-desktop/logs/package.log
+
+      # --- Packaged smoke test -------------------------------------------
+      - name: Smoke test packaged app (Windows)
+        timeout-minutes: 5
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm run test:packaged -- win32 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/test-packaged.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # --ozone-platform=headless survives a main-process launch but segfaults on
+      # window creation (see release-windows.yml), so Linux gets a virtual display.
+      - name: Smoke test packaged app (Linux)
+        timeout-minutes: 5
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          xvfb-run --auto-servernum npm run test:packaged -- linux 2>&1 | tee out/verify-desktop/logs/test-packaged.log
+
+      # --- Build the installer/distribution (no publish) ------------------
+      - name: Build distribution (Windows)
+        timeout-minutes: 8
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm run make -- --platform=win32 --skip-package 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/make.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build distribution (Linux)
+        timeout-minutes: 8
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          npm run make -- --platform=linux --skip-package 2>&1 | tee out/verify-desktop/logs/make.log
+
+      # --- Installer smoke test (Windows only) ---------------------------
+      # Users run Setup.exe, not the packaged directory. This installs it for
+      # real, checks Squirrel shortcuts, and launches what lands in %LOCALAPPDATA%.
+      - name: Smoke test Windows installer
+        timeout-minutes: 5
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm run test:installed 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/test-installed.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # --- Real-app CDP scenarios (the coverage lost with verify-windows) --
+      # verify:ui drives the DEV app over the main process's --inspect port; a
+      # packaged build disables that fuse, so this runs against the checkout, not
+      # out/. See docs/ui-driver.md and the plan's Part 1.2.
+      - name: Drive the app over CDP (Windows)
+        timeout-minutes: 12
+        if: matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          & npm run verify:ui 2>&1 | Tee-Object -FilePath out/verify-desktop/logs/verify-ui.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Drive the app over CDP (Linux)
+        timeout-minutes: 12
+        if: matrix.platform == 'linux'
+        run: |
+          set -o pipefail
+          xvfb-run --auto-servernum npm run verify:ui 2>&1 | tee out/verify-desktop/logs/verify-ui.log
+
+      # verify:ui writes screenshots and .docx output under out/ui-driver/. Copy
+      # just the screenshots into the evidence bundle so the upload stays
+      # logs+images only.
+      - name: Collect CDP screenshots (Windows)
+        if: always() && matrix.platform == 'win32'
+        shell: pwsh
+        run: |
+          if (Test-Path out/ui-driver) {
+            Get-ChildItem -Path out/ui-driver -Filter *.png -Recurse |
+              Copy-Item -Destination out/verify-desktop/screenshots -Force
+          }
+
+      - name: Collect CDP screenshots (Linux)
+        if: always() && matrix.platform == 'linux'
+        run: |
+          find out/ui-driver -name '*.png' -exec cp {} out/verify-desktop/screenshots/ \; 2>/dev/null || true
+
+      # --- Evidence upload (logs + screenshots ONLY) ----------------------
+      # Never uploads installers or packaged output. release-windows.yml
+      # documents that ~460 MB/run at 90-day retention filled the account's 2 GB
+      # Actions storage in nine runs; this bundle is a few MB at 3-day retention.
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-desktop-${{ matrix.platform }}
+          path: out/verify-desktop/**
+          if-no-files-found: warn
+          retention-days: 3

@@ -1,0 +1,85 @@
+# Focused, cheap UI-driver gate — runs the real-app CDP scenarios on Linux only.
+#
+# This is a lighter alternative to Verify Desktop, which also runs verify:ui but
+# only after packaging, an installer smoke test and a Windows leg (~40 min). When
+# all you want is to confirm the window still behaves — for example that the
+# "Import from Excel" button really drives the import handler end to end — dispatch
+# this instead: one Ubuntu runner, npm ci, and `npm run verify:ui` under a virtual
+# display. It packages nothing and publishes nothing.
+#
+# The import click-through is covered here and, unchanged, inside Verify Desktop
+# on both platforms — adding scripts/verify-excel-import.js to the verify:ui suite
+# wired it into both. See docs/ui-driver.md.
+#
+# Manual kickoff only, like every workflow in this repo. Run from:
+# Actions -> Verify UI -> Run workflow, or `gh workflow run verify-ui.yml --ref main`.
+# `test/workflows-manual-only.test.js` fails if any automatic trigger is added.
+name: Verify UI
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Which UI scenario to run'
+        type: choice
+        default: all
+        options:
+          - all
+          - excel-import
+          - word-export
+          - project-report
+          - asset-calculations
+          - project-recovery
+
+permissions:
+  contents: read
+
+jobs:
+  verify-ui:
+    name: Verify UI (Linux)
+    runs-on: ubuntu-24.04
+    # Linux-only, and its two real steps are ~98s (install) and ~89s (CDP).
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 6
+        run: |
+          set -o pipefail
+          mkdir -p out/ui-driver
+          npm ci 2>&1 | tee out/ui-driver/npm-ci.log
+
+      # xvfb gives Electron a display: --ozone-platform=headless survives a
+      # main-process launch but segfaults on window creation, so the driver needs
+      # a real (virtual) X server, exactly like Verify Desktop's Linux leg.
+      - name: Drive the app over CDP
+        timeout-minutes: 12
+        run: |
+          set -o pipefail
+          scenario='${{ inputs.scenario }}'
+          if [ -z "$scenario" ] || [ "$scenario" = 'all' ]; then
+            xvfb-run --auto-servernum npm run verify:ui 2>&1 | tee -a out/ui-driver/verify-ui.log
+          else
+            xvfb-run --auto-servernum node "scripts/verify-$scenario.js" 2>&1 | tee -a out/ui-driver/verify-ui.log
+          fi
+
+      # Screenshots and logs only — no packaged output, short retention.
+      - name: Upload UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-ui-linux
+          path: |
+            out/ui-driver/**/*.png
+            out/ui-driver/*.log
+          if-no-files-found: warn
+          retention-days: 3

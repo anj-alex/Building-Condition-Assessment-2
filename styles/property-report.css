@@ -1,0 +1,493 @@
+/*
+ * The preview renders the real DOCX, so it needs the document's own face.
+ *
+ * docx-preview turns the builder's `w:rFonts` into a bare `font-family: Calibri`
+ * with no fallback. On a machine without Calibri — every Linux box, and macOS
+ * without Office — that resolves to nothing and Chromium drops the whole
+ * document to its default serif, which is why the preview used to look nothing
+ * like the file it was previewing.
+ *
+ * `local()` comes first so a reader who has the real font sees the real font.
+ * The bundled fallback is Carlito, which is metric-compatible with Calibri:
+ * same advance widths, so the preview breaks lines where Word breaks them
+ * instead of only approximating the page. SIL OFL — see assets/fonts/.
+ */
+@font-face {
+  font-family: "Calibri";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: local("Calibri"), url("../assets/fonts/carlito-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Calibri";
+  font-style: italic;
+  font-weight: 400;
+  font-display: block;
+  src: local("Calibri Italic"), url("../assets/fonts/carlito-400-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Calibri";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: local("Calibri Bold"), url("../assets/fonts/carlito-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Calibri";
+  font-style: italic;
+  font-weight: 700;
+  font-display: block;
+  src: local("Calibri Bold Italic"), url("../assets/fonts/carlito-700-italic.woff2") format("woff2");
+}
+
+:root {
+  --preview-bg: #1a1f28;
+  --preview-panel: #111722;
+  --preview-panel-border: #2a3548;
+  --toolbar-bg: #0c1017;
+  --toolbar-btn-bg: #1e2836;
+  --toolbar-btn-bg-hover: #283447;
+  --toolbar-btn-border: #2a3548;
+  --toolbar-text: #e6ebf2;
+  --toolbar-muted-text: #9aa6b7;
+  --toolbar-accent-bg: #4a8fc9;
+  --toolbar-accent-hover: #5a9fd6;
+  --toolbar-accent-border: #3d7eb5;
+  --toolbar-accent-text: #ffffff;
+  --review-ok-text: #4ade80;
+}
+
+[data-theme="light"] {
+  --preview-bg: #c8d0db;
+  --preview-panel: #f7f9fc;
+  --preview-panel-border: #b9c5d4;
+  --toolbar-bg: #e8edf3;
+  --toolbar-btn-bg: #ffffff;
+  --toolbar-btn-bg-hover: #eef2f7;
+  --toolbar-btn-border: #c5d0de;
+  --toolbar-text: #1a2332;
+  --toolbar-muted-text: #5c6b7e;
+  --toolbar-accent-bg: #1d6bb5;
+  --toolbar-accent-hover: #2480d4;
+  --toolbar-accent-border: #185a9a;
+  --toolbar-accent-text: #ffffff;
+  --review-ok-text: #15803d;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--toolbar-text);
+  background: var(--preview-bg);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* This page does not load styles/styles.css, so it needs its own rule. */
+[hidden] {
+  display: none !important;
+}
+
+.report-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 3.75rem;
+  padding: 0.7rem 0.85rem;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--toolbar-bg) 94%, transparent);
+  border-bottom: 1px solid var(--toolbar-btn-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.report-toolbar button,
+.report-preview-action,
+.report-review-override,
+.report-export-actions button {
+  min-height: 2.3rem;
+  padding: 0.45rem 0.9rem;
+  box-sizing: border-box;
+  color: var(--toolbar-text);
+  background: var(--toolbar-btn-bg);
+  border: 1px solid var(--toolbar-btn-border);
+  border-radius: 4px;
+  font: 500 0.8125rem/1.2 "Segoe UI", system-ui, -apple-system, sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.report-toolbar button:hover:not(:disabled),
+.report-preview-action:hover,
+.report-review-override:hover,
+.report-export-actions button:hover {
+  background: var(--toolbar-btn-bg-hover);
+}
+
+.report-toolbar button:focus-visible,
+.report-preview-action:focus-visible,
+.report-review-override:focus-visible,
+.report-export-actions button:focus-visible {
+  outline: 2px solid #5d9cd4;
+  outline-offset: 2px;
+}
+
+.report-toolbar button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.report-toolbar button#export-word,
+.report-export-actions .btn-primary {
+  color: var(--toolbar-accent-text);
+  background: var(--toolbar-accent-bg);
+  border-color: var(--toolbar-accent-border);
+}
+
+.report-toolbar button#export-word:hover:not(:disabled),
+.report-export-actions .btn-primary:hover {
+  background: var(--toolbar-accent-hover);
+}
+
+.report-preview-badge {
+  flex: 0 0 auto;
+  padding: 0.22rem 0.48rem;
+  color: #dbeafe;
+  background: #1e3a5f;
+  border: 1px solid #315f91;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+[data-theme="light"] .report-preview-badge {
+  color: #17456f;
+  background: #dcecf9;
+  border-color: #94badb;
+}
+
+#export-status {
+  min-width: 0;
+  color: var(--toolbar-muted-text);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+.report-review,
+.report-preview-note {
+  width: min(calc(100% - 1.7rem), 64rem);
+  margin-right: auto;
+  margin-left: auto;
+  box-sizing: border-box;
+  color: var(--toolbar-text);
+  background: color-mix(in srgb, var(--toolbar-bg) 96%, transparent);
+  border: 1px solid var(--toolbar-btn-border);
+  border-radius: 8px;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.report-review {
+  margin-top: 0.7rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.report-preview-note {
+  margin-top: 0.55rem;
+  padding: 0.58rem 0.8rem;
+  color: var(--toolbar-muted-text);
+}
+
+.report-preview-note strong {
+  color: var(--toolbar-text);
+}
+
+.report-preview-note--stale {
+  color: #fbbf24;
+  border-color: #9a6700;
+}
+
+.report-review-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.report-review-summary--clean {
+  margin-bottom: 0;
+  color: var(--review-ok-text);
+}
+
+.report-review-counts {
+  color: var(--toolbar-muted-text);
+  font-size: 0.8rem;
+}
+
+.report-review-building {
+  margin: 0.5rem 0 0.25rem;
+  color: var(--toolbar-text);
+  font-size: 0.82rem;
+}
+
+.report-review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.report-review-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.report-review-badge {
+  flex: 0 0 auto;
+  padding: 0.05rem 0.4rem;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.report-review-item--warning .report-review-badge {
+  background: #b45309;
+}
+
+.report-review-item--error .report-review-badge {
+  background: #b91c1c;
+}
+
+.report-review-message {
+  flex: 1 1 auto;
+}
+
+.report-review-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  background: color-mix(in srgb, #b91c1c 10%, transparent);
+  border: 1px solid #b91c1c;
+  border-radius: 6px;
+}
+
+.report-review-block-message {
+  flex: 1 1 16rem;
+  font-weight: 600;
+}
+
+.report-review-override {
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+}
+
+.report-root {
+  min-height: calc(100vh - 3.75rem);
+  overflow: auto;
+}
+
+/* docx-preview supplies every document rule and all Letter-page dimensions. */
+.report-root .car-word-preview-wrapper {
+  min-width: max-content;
+  padding: 1.5rem 1.5rem 0 !important;
+  background: transparent !important;
+}
+
+.report-root .car-word-preview-wrapper > section.car-word-preview {
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0.3rem 1.6rem rgba(0, 0, 0, 0.4);
+}
+
+.report-preview-state {
+  display: grid;
+  justify-items: center;
+  width: min(calc(100% - 2rem), 34rem);
+  margin: 4rem auto;
+  padding: 2rem 2.2rem;
+  box-sizing: border-box;
+  color: var(--toolbar-text);
+  text-align: center;
+  background: var(--preview-panel);
+  border: 1px solid var(--preview-panel-border);
+  border-radius: 10px;
+  box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
+}
+
+.report-preview-state h1 {
+  margin: 0.9rem 0 0.35rem;
+  color: inherit;
+  font-size: 1.15rem;
+  line-height: 1.3;
+}
+
+.report-preview-state p {
+  margin: 0;
+  color: var(--toolbar-muted-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.report-preview-state--error {
+  border-color: #b91c1c;
+}
+
+.report-preview-state .report-preview-action {
+  margin-top: 1rem;
+}
+
+.report-preview-spinner {
+  width: 1.8rem;
+  height: 1.8rem;
+  box-sizing: border-box;
+  border: 3px solid color-mix(in srgb, var(--toolbar-muted-text) 35%, transparent);
+  border-top-color: var(--toolbar-accent-bg);
+  border-radius: 50%;
+  animation: report-preview-spin 0.85s linear infinite;
+}
+
+@keyframes report-preview-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.report-export-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.report-export-dialog {
+  width: min(30rem, 100%);
+  padding: 1.2rem 1.35rem;
+  box-sizing: border-box;
+  color: var(--toolbar-text);
+  background: var(--toolbar-bg);
+  border: 1px solid var(--toolbar-btn-border);
+  border-radius: 10px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.32);
+}
+
+.report-export-title {
+  margin: 0 0 0.4rem;
+  color: var(--toolbar-text);
+  font-size: 1.02rem;
+}
+
+.report-export-copy {
+  margin: 0 0 0.7rem;
+  font-size: 0.88rem;
+}
+
+.report-export-hint {
+  margin: 0.6rem 0 0;
+  color: var(--toolbar-muted-text);
+  font-size: 0.78rem;
+}
+
+.report-export-track {
+  overflow: hidden;
+  height: 6px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: 999px;
+}
+
+.report-export-fill {
+  width: 40%;
+  height: 100%;
+  background: #2563eb;
+  border-radius: 999px;
+  animation: report-export-slide 1.25s ease-in-out infinite;
+}
+
+@keyframes report-export-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+.report-export-files {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.report-export-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .report-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  #export-status {
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-preview-spinner,
+  .report-export-fill {
+    animation: none;
+  }
+
+  .report-export-fill {
+    width: 100%;
+    opacity: 0.65;
+  }
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .report-toolbar,
+  .report-review,
+  .report-preview-note,
+  .report-export-modal {
+    display: none !important;
+  }
+
+  .report-root .car-word-preview-wrapper {
+    padding: 0 !important;
+  }
+
+  .report-root .car-word-preview-wrapper > section.car-word-preview {
+    margin: 0;
+    box-shadow: none;
+  }
+}

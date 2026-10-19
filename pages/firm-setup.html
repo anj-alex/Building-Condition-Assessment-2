@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; img-src 'self' file: blob: data:"
+    />
+    <title>Firm Details — Condition Assessment Reports</title>
+    <link rel="stylesheet" href="../styles/styles.css" />
+    <link rel="stylesheet" href="../styles/project-setup.css" />
+    <link rel="stylesheet" href="../styles/firm-setup.css" />
+  </head>
+  <body class="page-scrollable-form page-firm-setup">
+    <button type="button" class="btn-secondary btn-back-fixed" id="back-home">
+      Back
+    </button>
+    <div class="setup-shell firm-setup-shell">
+      <header class="setup-header">
+        <h1 class="setup-title">Firm details</h1>
+        <p class="setup-lead">Used across generated reports.</p>
+      </header>
+
+      <form id="firm-setup-form" class="setup-form" novalidate>
+        <section class="setup-section" aria-labelledby="firm-heading">
+          <h2 class="setup-section-title" id="firm-heading">Prepared by</h2>
+          <div class="field">
+            <label for="firm-name">Firm name</label>
+            <input id="firm-name" name="name" type="text" autocomplete="organization" />
+          </div>
+          <div class="field">
+            <label for="firm-short-name">Short name / logo text</label>
+            <input id="firm-short-name" name="short_name" type="text" autocomplete="organization" />
+          </div>
+          <div class="field">
+            <label for="firm-address-line-1">Address line 1</label>
+            <input id="firm-address-line-1" name="address_line_1" type="text" autocomplete="street-address" />
+          </div>
+          <div class="field">
+            <label for="firm-address-line-2">Address line 2</label>
+            <input id="firm-address-line-2" name="address_line_2" type="text" />
+          </div>
+          <div class="firm-logo-field">
+            <div class="firm-logo-header">
+              <label>Firm logo</label>
+              <button type="button" class="btn-secondary firm-logo-add" id="choose-firm-logo">
+                Choose logo
+              </button>
+            </div>
+            <div id="firm-logo-preview" class="firm-logo-preview" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <div class="setup-actions setup-actions--split">
+          <div class="setup-actions-left"></div>
+          <div class="setup-actions-right">
+            <span
+              class="form-autosave-status"
+              id="firm-autosave-status"
+              aria-live="polite"
+            ></span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <script src="../src/ipc-surface.js" defer></script>
+    <script src="../src/renderer-api.js" defer></script>
+    <script src="../src/shared.js" defer></script>
+    <script src="../src/theme.js" defer></script>
+    <script src="../src/firm-setup.js" defer></script>
+  </body>
+</html>

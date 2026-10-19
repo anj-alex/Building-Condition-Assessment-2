@@ -1,0 +1,164 @@
+.page-building-info .setup-shell {
+  max-width: 38rem;
+  /* Extra top space: title + lead copy sit below fixed Back control */
+  padding-top: 4.25rem;
+}
+
+
+
+.field-row {
+  display: grid;
+  /* minmax(0, 1fr) lets tracks shrink past long label min-content so columns stay equal */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.field-row > .field {
+  min-width: 0;
+}
+
+.field-row > .field > label {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.field-row > .field > input,
+.field-row > .field > select,
+.field-row > .field > textarea {
+  width: 100%;
+  min-width: 0;
+}
+
+.field-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.field-display {
+  margin: 0;
+  padding: 0.55rem 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.building-photo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.building-photo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.building-photo-header label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.building-photo-add {
+  min-height: 2.2rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.building-photo-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.25rem, 1fr));
+  gap: 0.7rem;
+}
+
+.building-photo-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 1rem;
+  color: var(--text-muted);
+  background: var(--bg-elevated-2);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.building-photo-item {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+}
+
+.building-photo-item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-xs);
+}
+
+.building-photo-item figcaption {
+  margin-top: 0.35rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.building-photo-delete-btn {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  background: rgba(12, 16, 24, 0.62);
+  border: 0;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  z-index: 1;
+  backdrop-filter: blur(4px);
+  transition: background var(--duration) var(--ease);
+}
+
+.building-photo-delete-btn:hover {
+  color: #fff;
+  background: var(--danger);
+}
+
+.building-photo-delete-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(227, 93, 93, 0.5);
+}
+
+.building-photo-delete-btn svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: currentColor;
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

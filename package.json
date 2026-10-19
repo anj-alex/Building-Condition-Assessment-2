@@ -1,0 +1,63 @@
+{
+  "name": "condition-assesment-report-generator",
+  "productName": "Condition Assessment Report Generator",
+  "desktopName": "condition-assesment-report-generator.desktop",
+  "version": "1.17.4",
+  "description": "Desktop application for producing building condition assessment reports.",
+  "homepage": "https://github.com/KianBahasadri/condition-assesment-report-generator#readme",
+  "bugs": {
+    "url": "https://github.com/KianBahasadri/condition-assesment-report-generator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KianBahasadri/condition-assesment-report-generator.git"
+  },
+  "license": "ISC",
+  "author": "ANJ Software Development",
+  "type": "commonjs",
+  "main": "src/main.js",
+  "scripts": {
+    "postinstall": "electron-rebuild -f -w better-sqlite3 && node node_modules/electron/install.js",
+    "start": "electron-forge start",
+    "test": "node scripts/run-tests.js",
+    "test:coverage": "node scripts/run-tests.js --experimental-test-coverage --test-coverage-lines=72 --test-coverage-functions=64 --test-coverage-branches=60",
+    "verify:data": "node scripts/run-tests.js --verify-data",
+    "test:packaged": "node scripts/smoke-packaged-app.js",
+    "test:installed": "node scripts/smoke-installed-windows.js",
+    "verify:ui": "node scripts/verify-ui.js",
+    "verify:ui:asset": "node scripts/verify-asset-calculations.js",
+    "verify:ui:project": "node scripts/verify-project-report.js",
+    "encrypt-openrouter-key": "node scripts/encrypt-openrouter-key.js",
+    "prepackage": "node scripts/encrypt-openrouter-key.js",
+    "premake": "node scripts/encrypt-openrouter-key.js",
+    "package": "node --require ./scripts/fix-extract-zip.cjs ./node_modules/@electron-forge/cli/dist/electron-forge.js package",
+    "make": "node --require ./scripts/fix-extract-zip.cjs ./node_modules/@electron-forge/cli/dist/electron-forge.js make"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "7.11.2",
+    "@electron-forge/maker-deb": "7.11.2",
+    "@electron-forge/maker-rpm": "7.11.2",
+    "@electron-forge/maker-squirrel": "7.11.2",
+    "@electron-forge/maker-zip": "7.11.2",
+    "@electron-forge/plugin-auto-unpack-natives": "7.11.2",
+    "@electron-forge/plugin-fuses": "7.11.2",
+    "@electron/fuses": "1.8.0",
+    "@electron/rebuild": "4.1.0",
+    "electron": "43.0.0",
+    "electron-reloader": "1.2.3",
+    "jsdom": "^26.1.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "12.11.1",
+    "docx": "^9.7.1",
+    "docx-preview": "0.4.0",
+    "electron-squirrel-startup": "1.0.1",
+    "jszip": "3.10.1",
+    "tar": "7.5.22",
+    "xlsx": "file:vendor/xlsx-0.20.3.tgz"
+  },
+  "overrides": {
+    "tar": "7.5.22",
+    "tmp": "0.2.7"
+  }
+}
